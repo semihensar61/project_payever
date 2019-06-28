@@ -5,7 +5,7 @@ var http = require("https"),
   fs = require("fs");
 
 const methods = {
-  getUser:async id => {
+  getUser: async id => {
     return axios.default
       .get(`https://reqres.in/api/users/${id}`)
       .then(response => {
@@ -13,7 +13,7 @@ const methods = {
       });
   },
 
-   saveAvatar: async(url, userId) => {
+  saveAvatar: async (url, userId, callback) => {
     console.log("something");
     console.log(url);
     http
@@ -30,49 +30,43 @@ const methods = {
       })
       .end();
 
-      fs.writeFile(`./images/${userId}.txt`, url, err=>{
-        
-      })
+    fs.writeFile(`./images/${userId}.txt`, url, err => {});
 
     let p = `./images/${userId}.png`;
-    return p;
+    callback(p)
   },
-  returnBase64: async filePath => {
+  returnBase64: async (filePath, callback) => {
     const base64String = fs.readFileSync(filePath, { encoding: "base64" });
-    return base64String
+    callback(base64String);
   },
-  checkUrl:async (userId, newUrl) => {
-     fs.readFile(`./images/${userId}.txt`, 'utf8',(err, oldUrl)=>{
-       if(err){
+  checkUrl: async (userId, newUrl, callback) => {
+    let t = false;
+    fs.readFile(`./images/${userId}.txt`, "utf8", (err, oldUrl) => {
+      if (err) {
         console.log(err);
-       }else{
-        console.log('oldUrl: '+ oldUrl);
-        if(oldUrl == newUrl){
-          console.log('same url');
-          return 1
-        }else{
-          console.log('new url');
-          return 0
-        }
-       }
-
+      } else {
+        if (oldUrl = newUrl) {
+           t = true;
+        } 
+      }
+      callback (t);
     });
   },
-  deleteFile: (id) => {
+  deleteFile: id => {
     try {
       fs.unlink(`./images/${id}.png`);
       //file removed
-    } catch(err) {
-      console.error(err)
+    } catch (err) {
+      console.error(err);
     }
     try {
       fs.unlink(`./images/${id}.txt`);
       //file removed
-    } catch(err) {
-      console.error(err)
+    } catch (err) {
+      console.error(err);
     }
   },
-  avatarNotExist: (url, userId, filePath) => {
+  avatarNotExist: (url, userId, filePath, callback) => {
     console.log("something");
     console.log(url);
     http
@@ -84,21 +78,19 @@ const methods = {
         });
 
         response.on("end", function() {
-          fs.writeFile(`./images/${userId}.png`, data.read(), err =>{
-            fs.writeFile(`./images/${userId}.txt`, url)
-             fs.readFile(filePath, { encoding: "base64" }, (err, base64String) => {
-               //console.log(base64String);
-              return base64String
-             });
+          fs.writeFile(`./images/${userId}.png`, data.read(), err => {
+            fs.writeFile(`./images/${userId}.txt`, url);
+            fs.readFile(
+              filePath,
+              { encoding: "base64" },
+              (err, base64String) => {
+                callback(base64String);
+              }
+            );
           });
         });
       })
       .end();
-
-      
-
-    // let p = `./images/${userId}.png`;
-    // return p;
   }
 };
 

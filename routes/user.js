@@ -28,7 +28,7 @@ router.get(`/:id/avatar`, async (req, res) => {
   try {
     let path = `./images/${userId}.png`;
     const user = await methods.getUser(userId);
-    if (fs.existsSync(`./images/${userId}.png`)) {
+    if (fs.existsSync(`./images/${userId}.png`)) { // If user system got user's avatar before
       console.log("---AVATAR EXISTS-----");
       methods.checkUrl(userId, user.data.avatar, sameUrl => {
         console.log(sameUrl);
@@ -52,7 +52,7 @@ router.get(`/:id/avatar`, async (req, res) => {
           });
         }
       });
-    } else {
+    } else { //first time system save user's avatar
       console.log("---AVATAR NOT EXISTS-----");
       methods.avatarNotExist(user.data.avatar, userId, path, base64String => {
         res.status(200).json({
